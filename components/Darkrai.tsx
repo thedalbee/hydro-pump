@@ -30,7 +30,7 @@ export function DarkraiHeader() {
             }}
           >SHADOWBALL</h1>
           <p className="text-xs italic tracking-widest ui-sans" style={{ color: 'var(--text-muted)', marginTop: '-2px' }}>
-            OpenClaw Agent Monitor
+            Active Agent Monitor
           </p>
         </div>
         <button
