@@ -37,10 +37,11 @@ const STATUS_ICON: Record<string, string> = {
   queued: '○', running: '▶', done: '✓', failed: '✗',
 }
 const ACTION_BUTTONS = [
-  { status: 'done',      label: '완료', color: 'bg-green-500 hover:bg-green-400 text-black' },
-  { status: 'paused',    label: '보류', color: 'bg-yellow-500 hover:bg-yellow-400 text-black' },
-  { status: 'archived',  label: '보관', color: 'bg-gray-500 hover:bg-gray-400 text-white' },
-  { status: 'abandoned', label: '폐기', color: 'bg-red-600 hover:bg-red-500 text-white' },
+  { status: 'waiting', label: '대기', color: 'bg-gray-500 hover:bg-gray-400 text-white' },
+  { status: 'active',  label: '진행', color: 'bg-cyan-500 hover:bg-cyan-400 text-black' },
+  { status: 'issue',   label: '이슈', color: 'bg-orange-500 hover:bg-orange-400 text-black' },
+  { status: 'done',    label: '완료', color: 'bg-green-500 hover:bg-green-400 text-black' },
+  { status: 'archived',label: '보관', color: 'bg-gray-700 hover:bg-gray-600 text-white' },
 ]
 const LOG_TEXT: Record<string, string> = {
   system: 'text-secondary',

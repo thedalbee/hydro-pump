@@ -22,83 +22,103 @@ async function fetchProjects(): Promise<Project[]> {
   return (data ?? []) as Project[]
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  waiting: '대기',
+  active: '진행',
+  issue: '이슈',
+}
+const STATUS_DOT: Record<string, string> = {
+  waiting: 'bg-gray-400',
+  active: 'bg-cyan-400',
+  issue: 'bg-orange-400',
+}
+
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchProjects().then(setProjects)
+  const refresh = () => fetchProjects().then(setProjects)
 
+  useEffect(() => {
+    refresh()
     const channel = supabase
       .channel('dashboard-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
-        fetchProjects().then(setProjects)
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
-        fetchProjects().then(setProjects)
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, refresh)
       .subscribe()
-
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  const active = projects.filter(p => p.status === 'active')
+  // 3그룹 분류
+  const inProgress = projects.filter(p => ['waiting', 'active', 'issue'].includes(p.status))
   const done = projects.filter(p => p.status === 'done')
-  const paused = projects.filter(p => p.status === 'paused')
-  const archived = projects.filter(p => p.status === 'archived' || p.status === 'abandoned')
+  const archived = projects.filter(p => p.status === 'archived')
 
   return (
     <main className="min-h-screen">
       <DarkraiHeader />
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex items-center mb-4">
-          <h2 className="text-xs text-gray-500 tracking-widest ui-sans">
-            ACTIVE {active.length > 0 && <span className="text-cyan-400">({active.length})</span>}
-          </h2>
-        </div>
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-10">
 
-        {active.length === 0 ? (
-          <div className="text-center py-16 text-sm italic text-muted ui-sans">
-            No active projects.<br />Create one to get started.
+        {/* 그룹 1: 진행 중 */}
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xs tracking-widest ui-sans text-muted">진행 중</h2>
+            {inProgress.length > 0 && (
+              <div className="flex gap-2 ui-sans text-xs text-muted">
+                {(['waiting','active','issue'] as const).map(s => {
+                  const count = inProgress.filter(p => p.status === s).length
+                  if (!count) return null
+                  return (
+                    <span key={s} className="flex items-center gap-1">
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s]}`} />
+                      {STATUS_LABEL[s]} {count}
+                    </span>
+                  )
+                })}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-3">
-            {active.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
-          </div>
-        )}
-
-        {done.length > 0 && (
-          <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
-              POKÉDEX <span className="text-green-400">({done.length})</span>
-            </h2>
+          {inProgress.length === 0 ? (
+            <p className="text-center py-12 text-sm italic text-muted ui-sans">진행 중인 프로젝트가 없어요.</p>
+          ) : (
             <div className="space-y-3">
-              {done.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
+              {inProgress.map(p => (
+                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
+              ))}
             </div>
-          </>
+          )}
+        </section>
+
+        {/* 그룹 2: 완료 — 포켓덱스 */}
+        {done.length > 0 && (
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xs tracking-widest ui-sans text-muted">포켓덱스</h2>
+              <span className="ui-sans text-xs text-green-400">{done.length}</span>
+            </div>
+            <div className="space-y-3 opacity-80">
+              {done.map(p => (
+                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
+              ))}
+            </div>
+          </section>
         )}
 
-        {paused.length > 0 && (
-          <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
-              PAUSED <span className="text-yellow-400">({paused.length})</span>
-            </h2>
-            <div className="space-y-3 opacity-60">
-              {paused.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
-            </div>
-          </>
-        )}
-
+        {/* 그룹 3: 보관 */}
         {archived.length > 0 && (
-          <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
-              ARCHIVED <span className="text-gray-500">({archived.length})</span>
-            </h2>
-            <div className="space-y-3 opacity-40">
-              {archived.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xs tracking-widest ui-sans text-muted">보관</h2>
+              <span className="ui-sans text-xs text-muted">{archived.length}</span>
             </div>
-          </>
+            <div className="space-y-3 opacity-40">
+              {archived.map(p => (
+                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
+              ))}
+            </div>
+          </section>
         )}
+
       </div>
     </main>
   )
