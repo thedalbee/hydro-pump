@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ProjectCard } from '@/components/ProjectCard'
 import { DarkraiHeader } from '@/components/Darkrai'
-import Link from 'next/link'
 
 interface Project {
   id: string
@@ -51,16 +50,10 @@ export default function Dashboard() {
     <main className="min-h-screen bg-gray-950">
       <DarkraiHeader />
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center mb-4">
           <h2 className="text-xs text-gray-500 tracking-widest ui-sans">
             ACTIVE {active.length > 0 && <span className="text-cyan-400">({active.length})</span>}
           </h2>
-          <Link
-            href="/new-project"
-            className="text-xs bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-3 py-1.5 rounded transition-colors ui-sans"
-          >
-            + NEW PROJECT
-          </Link>
         </div>
 
         {active.length === 0 ? (

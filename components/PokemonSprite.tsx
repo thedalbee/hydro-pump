@@ -6,27 +6,33 @@ interface Props {
   pokemonId: number
   progress: number
   lastUpdatedAt: string
+  size?: number
 }
 
-export function PokemonSprite({ pokemonId, progress, lastUpdatedAt }: Props) {
+export function PokemonSprite({ pokemonId, progress, lastUpdatedAt, size = 80 }: Props) {
   const stage = getEvolutionStage(progress)
   const abandoned = isAbandoned(lastUpdatedAt)
   const src = stage === 0 ? EGG_SPRITE : getSpriteUrl(pokemonId)
 
   return (
-    <div className="relative flex flex-col items-center w-24 h-24 flex-shrink-0">
-      <div className={`w-full h-full flex items-center justify-center ${abandoned ? 'opacity-40 grayscale' : ''}`}>
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <div className={abandoned ? 'opacity-40 grayscale' : ''}>
         <Image
           src={src}
           alt={`pokemon-${pokemonId}`}
-          width={80}
-          height={80}
+          width={size}
+          height={size}
           style={{ imageRendering: 'pixelated' }}
           unoptimized
         />
       </div>
       {abandoned && (
-        <span className="absolute -top-2 right-0 text-base animate-bounce select-none">💤</span>
+        <span className="absolute -top-1 -right-1 ui-sans">
+          {/* Zzz SVG */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-gray-400 animate-bounce">
+            <text x="2" y="18" fontSize="16" fill="currentColor" fontFamily="sans-serif" fontWeight="bold">z</text>
+          </svg>
+        </span>
       )}
     </div>
   )
