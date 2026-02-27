@@ -22,20 +22,29 @@ async function fetchProjects(): Promise<Project[]> {
   return (data ?? []) as Project[]
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  waiting: '대기',
-  active: '진행',
-  issue: '이슈',
-}
+const TABS = [
+  { key: 'inprogress', label: '진행 중' },
+  { key: 'done',       label: '포켓덱스' },
+  { key: 'archived',   label: '보관' },
+] as const
+
+type TabKey = typeof TABS[number]['key']
+
 const STATUS_DOT: Record<string, string> = {
   waiting: 'bg-gray-400',
-  active: 'bg-cyan-400',
-  issue: 'bg-orange-400',
+  active:  'bg-cyan-400',
+  issue:   'bg-orange-400',
+}
+const STATUS_LABEL: Record<string, string> = {
+  waiting: '대기',
+  active:  '진행',
+  issue:   '이슈',
 }
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [tab, setTab] = useState<TabKey>('inprogress')
 
   const refresh = () => fetchProjects().then(setProjects)
 
@@ -49,74 +58,76 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  // 3그룹 분류
-  const inProgress = projects.filter(p => ['waiting', 'active', 'issue'].includes(p.status))
-  const done = projects.filter(p => p.status === 'done')
-  const archived = projects.filter(p => p.status === 'archived')
+  const inprogress = projects.filter(p => ['waiting', 'active', 'issue'].includes(p.status))
+  const done       = projects.filter(p => p.status === 'done')
+  const archived   = projects.filter(p => p.status === 'archived')
+
+  const counts: Record<TabKey, number> = { inprogress: inprogress.length, done: done.length, archived: archived.length }
+  const current = { inprogress, done, archived }[tab]
 
   return (
     <main className="min-h-screen">
       <DarkraiHeader />
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-10">
+      <div className="max-w-2xl mx-auto px-4 py-6">
 
-        {/* 그룹 1: 진행 중 */}
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-xs tracking-widest ui-sans text-muted">진행 중</h2>
-            {inProgress.length > 0 && (
-              <div className="flex gap-2 ui-sans text-xs text-muted">
-                {(['waiting','active','issue'] as const).map(s => {
-                  const count = inProgress.filter(p => p.status === s).length
-                  if (!count) return null
-                  return (
-                    <span key={s} className="flex items-center gap-1">
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${STATUS_DOT[s]}`} />
-                      {STATUS_LABEL[s]} {count}
-                    </span>
-                  )
-                })}
-              </div>
-            )}
+        {/* 탭 */}
+        <div className="flex gap-1 mb-6 p-1 rounded-xl ui-sans" style={{ background: 'var(--bg-input)' }}>
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              onClick={() => { setTab(t.key); setExpandedId(null) }}
+              className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+              style={{
+                background: tab === t.key ? 'var(--bg-card)' : 'transparent',
+                color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
+                boxShadow: tab === t.key ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
+              }}
+            >
+              {t.label}
+              {counts[t.key] > 0 && (
+                <span className="ml-1.5 text-xs" style={{ color: tab === t.key ? '#22d3ee' : 'var(--text-muted)' }}>
+                  {counts[t.key]}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* 진행 중 — 상태별 뱃지 */}
+        {tab === 'inprogress' && inprogress.length > 0 && (
+          <div className="flex gap-3 mb-4 ui-sans">
+            {(['waiting','active','issue'] as const).map(s => {
+              const count = inprogress.filter(p => p.status === s).length
+              if (!count) return null
+              return (
+                <span key={s} className="flex items-center gap-1.5 text-xs text-muted">
+                  <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[s]}`} />
+                  {STATUS_LABEL[s]} {count}
+                </span>
+              )
+            })}
           </div>
-          {inProgress.length === 0 ? (
-            <p className="text-center py-12 text-sm italic text-muted ui-sans">진행 중인 프로젝트가 없어요.</p>
-          ) : (
-            <div className="space-y-3">
-              {inProgress.map(p => (
-                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* 그룹 2: 완료 — 포켓덱스 */}
-        {done.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-xs tracking-widest ui-sans text-muted">포켓덱스</h2>
-              <span className="ui-sans text-xs text-green-400">{done.length}</span>
-            </div>
-            <div className="space-y-3 opacity-80">
-              {done.map(p => (
-                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
-              ))}
-            </div>
-          </section>
         )}
 
-        {/* 그룹 3: 보관 */}
-        {archived.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-xs tracking-widest ui-sans text-muted">보관</h2>
-              <span className="ui-sans text-xs text-muted">{archived.length}</span>
-            </div>
-            <div className="space-y-3 opacity-40">
-              {archived.map(p => (
-                <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={refresh} />
-              ))}
-            </div>
-          </section>
+        {/* 카드 목록 */}
+        {current.length === 0 ? (
+          <p className="text-center py-20 text-sm italic text-muted ui-sans">
+            {tab === 'inprogress' && '진행 중인 프로젝트가 없어요.'}
+            {tab === 'done' && '아직 완료된 프로젝트가 없어요.'}
+            {tab === 'archived' && '보관된 프로젝트가 없어요.'}
+          </p>
+        ) : (
+          <div className="space-y-3" style={{ opacity: tab === 'archived' ? 0.5 : 1 }}>
+            {current.map(p => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                expandedId={expandedId}
+                onToggle={setExpandedId}
+                onUpdate={refresh}
+              />
+            ))}
+          </div>
         )}
 
       </div>
