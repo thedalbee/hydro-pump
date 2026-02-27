@@ -57,16 +57,6 @@ export function ProjectCard({
 
 
 
-  async function toggleTask(taskId: string, currentStatus: string) {
-    const newStatus = currentStatus === 'done' ? 'queued' : 'done'
-    await fetch(`/api/tasks/${taskId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
-    onUpdate()
-  }
-
   // 체크 안 된 것 먼저 (running → queued → failed), 체크된 것 아래 (checked_at 순)
   const sortedTasks = [...project.tasks].sort((a, b) => {
     const isDoneA = a.status === 'done'
@@ -178,9 +168,8 @@ export function ProjectCard({
             {sortedTasks.map(task => (
               <li
                 key={task.id}
-                className="flex items-center gap-2 ui-sans cursor-pointer group"
+                className="flex items-center gap-2 ui-sans"
                 style={{ fontSize: '0.8rem' }}
-                onClick={e => { e.stopPropagation(); toggleTask(task.id, task.status) }}
               >
                 {task.status === 'running' ? (
                   <span className="flex-shrink-0 text-cyan-400 animate-pulse" style={{ fontSize: '0.7rem' }}>▶</span>
@@ -197,7 +186,7 @@ export function ProjectCard({
                     {task.status === 'done' ? '✓' : ''}
                   </span>
                 )}
-                <span className={`transition-colors ${task.status === 'done' ? 'text-muted line-through' : 'text-secondary group-hover:text-primary'}`}>
+                <span className={`${task.status === 'done' ? 'text-muted line-through' : 'text-secondary'}`}>
                   {task.title}
                 </span>
               </li>
