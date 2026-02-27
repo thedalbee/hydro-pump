@@ -53,8 +53,8 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
 }
 
-export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate: () => void }) {
-  const [expanded, setExpanded] = useState(false)
+export function ProjectCard({ project, expandedId, onToggle, onUpdate }: { project: Project; expandedId: string | null; onToggle: (id: string | null) => void; onUpdate: () => void }) {
+  const expanded = expandedId === project.id
   const [hovered, setHovered] = useState(false)
   const [logs, setLogs] = useState<Log[]>([])
   const [input, setInput] = useState('')
@@ -120,7 +120,7 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
         className="p-3 flex gap-3 cursor-pointer select-none"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => setExpanded(v => !v)}
+        onClick={() => onToggle(expanded ? null : project.id)}
       >
         <div className="flex-shrink-0 flex items-center">
           <PokemonSprite

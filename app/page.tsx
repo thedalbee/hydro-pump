@@ -24,6 +24,7 @@ async function fetchProjects(): Promise<Project[]> {
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([])
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProjects().then(setProjects)
@@ -62,7 +63,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {active.map(p => <ProjectCard key={p.id} project={p} onUpdate={() => fetchProjects().then(setProjects)} />)}
+            {active.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
           </div>
         )}
 
@@ -72,7 +73,7 @@ export default function Dashboard() {
               POKÉDEX <span className="text-green-400">({done.length})</span>
             </h2>
             <div className="space-y-3">
-              {done.map(p => <ProjectCard key={p.id} project={p} onUpdate={() => fetchProjects().then(setProjects)} />)}
+              {done.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
             </div>
           </>
         )}
@@ -83,7 +84,7 @@ export default function Dashboard() {
               PAUSED <span className="text-yellow-400">({paused.length})</span>
             </h2>
             <div className="space-y-3 opacity-60">
-              {paused.map(p => <ProjectCard key={p.id} project={p} onUpdate={() => fetchProjects().then(setProjects)} />)}
+              {paused.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
             </div>
           </>
         )}
@@ -94,7 +95,7 @@ export default function Dashboard() {
               ARCHIVED <span className="text-gray-500">({archived.length})</span>
             </h2>
             <div className="space-y-3 opacity-40">
-              {archived.map(p => <ProjectCard key={p.id} project={p} onUpdate={() => fetchProjects().then(setProjects)} />)}
+              {archived.map(p => <ProjectCard key={p.id} project={p} expandedId={expandedId} onToggle={setExpandedId} onUpdate={() => fetchProjects().then(setProjects)} />)}
             </div>
           </>
         )}
