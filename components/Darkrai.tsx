@@ -14,7 +14,7 @@ export function DarkraiHeader() {
           className="font-bold text-white"
           style={{
             fontSize: '2rem',
-            letterSpacing: '0.25em',
+            letterSpacing: '0.1em',
             transform: 'scaleY(0.6)',
             transformOrigin: 'left center',
             display: 'inline-block',
