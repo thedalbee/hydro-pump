@@ -1,6 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useState } from 'react'
 import { PokemonSprite } from './PokemonSprite'
 import { StatusPicker } from './StatusPicker'
 
@@ -9,13 +8,6 @@ interface Task {
   title: string
   status: 'queued' | 'running' | 'done' | 'failed'
   agent_label: string
-}
-
-interface Log {
-  id: string
-  type: 'system' | 'agent' | 'user'
-  message: string
-  created_at: string
 }
 
 interface Project {
@@ -50,22 +42,6 @@ const TASK_STATUS_ICON: Record<string, string> = {
   queued: '○', running: '▶', done: '✓', failed: '✗',
 }
 
-const LOG_COLOR: Record<string, string> = {
-  system: 'var(--text-muted)',
-  agent:  '#22d3ee',
-  user:   'var(--text-primary)',
-}
-const LOG_PREFIX: Record<string, string> = { system: '·', agent: '▶', user: '›' }
-
-function formatRelativeDate(iso: string) {
-  const d = new Date(iso)
-  const now = new Date()
-  const daysDiff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
-  if (daysDiff === 0) return '오늘'
-  if (daysDiff === 1) return '어제'
-  if (daysDiff === 2) return '그저께'
-  return `${daysDiff}일 전`
-}
 
 export function ProjectCard({
   project, expandedId, onToggle, onUpdate,
@@ -77,26 +53,7 @@ export function ProjectCard({
 }) {
   const expanded = expandedId === project.id
   const [hovered, setHovered] = useState(false)
-  const [logs, setLogs] = useState<Log[]>([])
-  const bottomRef = useRef<HTMLDivElement>(null)
   const runningCount = project.tasks.filter(t => t.status === 'running').length
-
-  useEffect(() => {
-    if (!expanded) return
-    fetch(`/api/logs?project_id=${project.id}`)
-      .then(r => r.json())
-      .then(data => setLogs(Array.isArray(data) ? data : []))
-
-    const channel = supabase
-      .channel(`log-${project.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'logs',
-        filter: `project_id=eq.${project.id}`,
-      }, payload => setLogs(prev => [...prev, payload.new as Log]))
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [expanded, project.id])
 
 
 
@@ -109,6 +66,18 @@ export function ProjectCard({
     })
     onUpdate()
   }
+
+  // 체크 안 된 것 먼저 (running → queued → failed), 체크된 것 아래 (checked_at 순)
+  const sortedTasks = [...project.tasks].sort((a, b) => {
+    const isDoneA = a.status === 'done'
+    const isDoneB = b.status === 'done'
+    if (isDoneA !== isDoneB) return isDoneA ? 1 : -1
+    if (!isDoneA) {
+      const order = { running: 0, queued: 1, failed: 2 }
+      return (order[a.status as keyof typeof order] ?? 9) - (order[b.status as keyof typeof order] ?? 9)
+    }
+    return 0 // done끼리는 서버 순서 유지 (체크한 순)
+  })
 
   async function changeStatus(status: string) {
     await fetch(`/api/projects/${project.id}`, {
@@ -171,14 +140,10 @@ export function ProjectCard({
               <span className="ui-sans text-xs text-muted flex-shrink-0">{project.progress}%</span>
             </div>
 
-            {!expanded && project.tasks.length > 0 && (() => {
-              const sorted = [...project.tasks].sort((a, b) => {
-                const order = { running: 0, queued: 1, failed: 2, done: 3 }
-                return (order[a.status as keyof typeof order] ?? 9) - (order[b.status as keyof typeof order] ?? 9)
-              })
-              const topTask = sorted[0]
+            {!expanded && sortedTasks.length > 0 && (() => {
+              const topTask = sortedTasks[0]
               return (
-                <ul className="mt-1.5 space-y-0.5">
+                <ul className="mt-1.5">
                   <li className="flex items-center gap-1.5 ui-sans" style={{ fontSize: '0.75rem' }}>
                     {topTask.status === 'running' ? (
                       <span className="flex-shrink-0 text-cyan-400 animate-pulse text-xs">▶</span>
@@ -206,85 +171,38 @@ export function ProjectCard({
         </div>
       </div>
 
-      {/* 펼쳐진 영역 — 스크롤 통합 */}
+      {/* 펼쳐진 영역 */}
       {expanded && (
         <div className="max-h-72 overflow-y-auto" style={{ borderTop: '1px solid var(--border)' }}>
-          {/* 태스크 전체 */}
-          {project.tasks.length > 0 && (() => {
-            const sorted = [...project.tasks].sort((a, b) => {
-              const order = { running: 0, queued: 1, failed: 2, done: 3 }
-              return (order[a.status as keyof typeof order] ?? 9) - (order[b.status as keyof typeof order] ?? 9)
-            })
-            return (
-              <ul className="px-4 pt-3 pb-2 space-y-1.5">
-                {sorted.map(task => (
-                  <li key={task.id} className="flex items-center gap-2 ui-sans" style={{ fontSize: '0.8rem' }}>
-                    {task.status === 'running' ? (
-                      <span className="flex-shrink-0 text-cyan-400 animate-pulse" style={{ fontSize: '0.7rem' }}>▶</span>
-                    ) : (
-                      <span
-                        className="flex-shrink-0 inline-flex items-center justify-center rounded-[3px] border"
-                        style={{
-                          width: '13px', height: '13px', fontSize: '9px', lineHeight: 1,
-                          borderColor: task.status === 'done' ? '#4ade80' : 'var(--border-hover)',
-                          background: task.status === 'done' ? '#4ade80' : 'transparent',
-                          color: task.status === 'done' ? '#000' : 'transparent',
-                        }}
-                      >
-                        {task.status === 'done' ? '✓' : ''}
-                      </span>
-                    )}
-                    <span className={`${task.status === 'done' ? 'text-muted line-through' : 'text-secondary'}`}>
-                      {task.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )
-          })()}
-
-          {/* 구분선 */}
-          {logs.length > 0 && (
-            <div style={{ borderTop: '1px solid var(--border)', margin: '0 16px' }} />
-          )}
-
-          {/* 로그 타임라인 */}
-          <div className="px-4 pt-2 pb-3 space-y-1">
-            {logs.length === 0
-              ? <p className="ui-sans text-xs text-muted italic">아직 기록이 없어요.</p>
-              : (() => {
-                  const groups: { label: string; items: Log[] }[] = []
-                  let lastLabel = ''
-                  for (const log of logs) {
-                    const label = formatRelativeDate(log.created_at)
-                    if (label !== lastLabel) {
-                      groups.push({ label, items: [log] })
-                      lastLabel = label
-                    } else {
-                      groups[groups.length - 1].items.push(log)
-                    }
-                  }
-                  return groups.map(g => (
-                    <div key={g.label}>
-                      <div className="ui-sans text-muted mb-1 mt-2 first:mt-0 select-none" style={{ fontSize: '0.62rem', letterSpacing: '0.05em' }}>
-                        — {g.label}
-                      </div>
-                      {g.items.map(log => (
-                        <div key={log.id} className="flex items-start gap-2 mb-1">
-                          <span className="ui-sans text-xs flex-shrink-0 mt-0.5" style={{ color: LOG_COLOR[log.type] }}>
-                            {LOG_PREFIX[log.type]}
-                          </span>
-                          <span className="ui-sans text-sm leading-snug" style={{ color: LOG_COLOR[log.type] }}>
-                            {log.message}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                })()
-            }
-            <div ref={bottomRef} />
-          </div>
+          <ul className="px-4 py-3 space-y-2">
+            {sortedTasks.map(task => (
+              <li
+                key={task.id}
+                className="flex items-center gap-2 ui-sans cursor-pointer group"
+                style={{ fontSize: '0.8rem' }}
+                onClick={e => { e.stopPropagation(); toggleTask(task.id, task.status) }}
+              >
+                {task.status === 'running' ? (
+                  <span className="flex-shrink-0 text-cyan-400 animate-pulse" style={{ fontSize: '0.7rem' }}>▶</span>
+                ) : (
+                  <span
+                    className="flex-shrink-0 inline-flex items-center justify-center rounded-[3px] border transition-colors"
+                    style={{
+                      width: '13px', height: '13px', fontSize: '9px', lineHeight: 1,
+                      borderColor: task.status === 'done' ? '#4ade80' : 'var(--border-hover)',
+                      background: task.status === 'done' ? '#4ade80' : 'transparent',
+                      color: task.status === 'done' ? '#000' : 'transparent',
+                    }}
+                  >
+                    {task.status === 'done' ? '✓' : ''}
+                  </span>
+                )}
+                <span className={`transition-colors ${task.status === 'done' ? 'text-muted line-through' : 'text-secondary group-hover:text-primary'}`}>
+                  {task.title}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
