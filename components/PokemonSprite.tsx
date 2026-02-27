@@ -4,14 +4,13 @@ import { useTheme } from '@/lib/theme'
 import { getEvolutionStage, getActualPokemonId, getSpriteUrl, EGG_SPRITE, isAbandoned, shouldRevealPokemon } from '@/lib/pokemon'
 
 interface Props {
-  pokemonId: number
+  pokemonId: number   // DB에 저장된 기본형 ID
   progress: number
   lastUpdatedAt: string
   size?: number
-  elevated?: boolean  // 카드 열렸을 때 앞으로 나오는 효과
 }
 
-export function PokemonSprite({ pokemonId, progress, lastUpdatedAt, size = 80, elevated = false }: Props) {
+export function PokemonSprite({ pokemonId, progress, lastUpdatedAt, size = 80 }: Props) {
   const { theme } = useTheme()
   const stage = getEvolutionStage(progress)
   const abandoned = isAbandoned(lastUpdatedAt)
@@ -20,10 +19,6 @@ export function PokemonSprite({ pokemonId, progress, lastUpdatedAt, size = 80, e
   const src = !revealed || stage === 0 ? EGG_SPRITE : getSpriteUrl(actualId)
   const cardBg = theme === 'dark' ? '#111827' : '#ffffff'
   const outline = `drop-shadow(1px 0 0 ${cardBg}) drop-shadow(-1px 0 0 ${cardBg}) drop-shadow(0 1px 0 ${cardBg}) drop-shadow(0 -1px 0 ${cardBg})`
-  // 열리면 그림자 깊어지면서 앞으로 나온 느낌
-  const elevation = elevated
-    ? 'drop-shadow(0 8px 16px rgba(0,0,0,0.6)) drop-shadow(0 2px 4px rgba(0,229,255,0.15))'
-    : 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
@@ -33,11 +28,7 @@ export function PokemonSprite({ pokemonId, progress, lastUpdatedAt, size = 80, e
           alt={`pokemon-${actualId}`}
           width={size}
           height={size}
-          style={{
-            imageRendering: 'pixelated',
-            filter: `${outline} ${elevation}`,
-            transition: 'filter 0.3s ease',
-          }}
+          style={{ imageRendering: 'pixelated', filter: outline }}
           unoptimized
         />
       </div>
