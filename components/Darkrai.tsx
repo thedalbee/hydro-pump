@@ -13,9 +13,9 @@ export function DarkraiHeader() {
         <h1
           className="font-bold text-white"
           style={{
-            fontSize: '2rem',
-            letterSpacing: '0.25em',
-            transform: 'scaleY(0.6)',
+            fontSize: '2.8rem',
+            letterSpacing: '-0.04em',
+            transform: 'scaleX(0.6)',
             transformOrigin: 'left center',
             display: 'inline-block',
             lineHeight: 1,
