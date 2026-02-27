@@ -5,3 +5,12 @@
 html {
   font-size: 17px;
 }
+
+/* 인터랙션 요소 전부 산세리프 */
+button, a, input, textarea, select, label {
+  font-family: 'Inter', sans-serif;
+}
+
+.ui-sans {
+  font-family: 'Inter', sans-serif;
+}

@@ -45,9 +45,9 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start gap-2">
           <h3 className="text-white font-bold text-sm truncate">{project.name}</h3>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 ui-sans">
             {runningCount > 0 && (
-              <span className="text-xs text-cyan-400 italic animate-pulse">{runningCount} running</span>
+              <span className="text-xs text-cyan-400 animate-pulse">{runningCount} running</span>
             )}
             <span className="text-xs text-gray-400">{project.progress}%</span>
             <ProjectMenu projectId={project.id} currentStatus={project.status} onUpdate={onUpdate} />
@@ -66,10 +66,10 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
         {project.tasks.length > 0 && (
           <ul className="mt-3 space-y-1">
             {project.tasks.map(task => (
-              <li key={task.id} className="flex items-center gap-2 text-xs">
+              <li key={task.id} className="flex items-center gap-2 text-xs ui-sans">
                 <span className={STATUS_COLOR[task.status]}>{STATUS_ICON[task.status]}</span>
                 <span className="text-gray-300 truncate">{task.title}</span>
-                <span className="text-gray-600 ml-auto flex-shrink-0 italic">{task.agent_label}</span>
+                <span className="text-gray-600 ml-auto flex-shrink-0">{task.agent_label}</span>
               </li>
             ))}
           </ul>

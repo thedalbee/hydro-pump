@@ -52,12 +52,12 @@ export default function Dashboard() {
       <DarkraiHeader />
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xs text-gray-500 tracking-widest">
+          <h2 className="text-xs text-gray-500 tracking-widest ui-sans">
             ACTIVE {active.length > 0 && <span className="text-cyan-400">({active.length})</span>}
           </h2>
           <Link
             href="/new-project"
-            className="text-xs bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-3 py-1.5 rounded transition-colors"
+            className="text-xs bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-3 py-1.5 rounded transition-colors ui-sans"
           >
             + NEW PROJECT
           </Link>
@@ -75,7 +75,7 @@ export default function Dashboard() {
 
         {done.length > 0 && (
           <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4">
+            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
               POKÉDEX <span className="text-green-400">({done.length})</span>
             </h2>
             <div className="space-y-3">
@@ -86,7 +86,7 @@ export default function Dashboard() {
 
         {paused.length > 0 && (
           <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4">
+            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
               PAUSED <span className="text-yellow-400">({paused.length})</span>
             </h2>
             <div className="space-y-3 opacity-60">
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
         {archived.length > 0 && (
           <>
-            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4">
+            <h2 className="text-xs text-gray-500 tracking-widest mt-10 mb-4 ui-sans">
               ARCHIVED <span className="text-gray-500">({archived.length})</span>
             </h2>
             <div className="space-y-3 opacity-40">
