@@ -33,23 +33,14 @@ export function DarkraiHeader() {
             OpenClaw Agent Monitor
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* 다크/라이트 토글 */}
-          <button
-            onClick={toggle}
-            className="ui-sans text-xs px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors"
-            style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
-            title={theme === 'dark' ? '라이트 모드' : '다크 모드'}
-          >
-            {theme === 'dark' ? '☀︎' : '☽'}
-          </button>
-          <Link
-            href="/new-project"
-            className="ui-sans text-xs bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-black font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer flex-shrink-0"
-          >
-            + New Project
-          </Link>
-        </div>
+        <button
+          onClick={toggle}
+          className="ui-sans text-xs px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex-shrink-0"
+          style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          title={theme === 'dark' ? '라이트 모드' : '다크 모드'}
+        >
+          {theme === 'dark' ? '☀︎' : '☽'}
+        </button>
       </div>
     </header>
   )

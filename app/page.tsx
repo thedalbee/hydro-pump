@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ProjectCard } from '@/components/ProjectCard'
 import { DarkraiHeader } from '@/components/Darkrai'
+import Link from 'next/link'
 
 interface Project {
   id: string
@@ -131,6 +132,13 @@ export default function Dashboard() {
         )}
 
       </div>
+      {/* FAB — 우측 하단 고정 */}
+      <Link
+        href="/new-project"
+        className="ui-sans fixed bottom-6 right-6 bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-black font-bold px-5 py-3 rounded-full shadow-lg transition-colors cursor-pointer text-sm z-50"
+      >
+        + New Project
+      </Link>
     </main>
   )
 }
