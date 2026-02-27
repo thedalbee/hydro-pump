@@ -86,7 +86,7 @@ export function ProjectCard({
           <div
             className="flex-shrink-0 self-center"
             style={{
-              transform: expanded ? 'translateY(-6px)' : 'translateY(0)',
+              transform: expanded ? 'translateY(-4px)' : 'translateY(0)',
               transition: 'transform 0.3s ease',
             }}
           >
@@ -95,6 +95,7 @@ export function ProjectCard({
               progress={project.progress}
               lastUpdatedAt={project.last_updated_at}
               size={72}
+              elevated={expanded}
             />
           </div>
 
