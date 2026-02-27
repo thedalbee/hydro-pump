@@ -14,3 +14,79 @@ button, a, input, textarea, select, label {
 .ui-sans {
   font-family: 'Inter', sans-serif;
 }
+
+/* ── 다크 모드 (기본) ── */
+:root, [data-theme="dark"] {
+  --bg: #030712;
+  --bg-card: #111827;
+  --bg-input: #1f2937;
+  --border: #1f2937;
+  --border-hover: #4B5563;
+  --border-focus: #06b6d4;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-input: #f9fafb;
+  --placeholder: #6b7280;
+  --progress-track: #1f2937;
+}
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --border: #e2e8f0;
+  --border-hover: #94a3b8;
+  --border-focus: #0891b2;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-input: #0f172a;
+  --placeholder: #94a3b8;
+  --progress-track: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+/* 카드 */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.card:hover {
+  border-color: var(--border-hover);
+}
+.card.expanded {
+  border-color: var(--border-focus);
+}
+
+/* 입력창 */
+.input {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-input);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.input::placeholder {
+  color: var(--placeholder);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+/* 텍스트 유틸 */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.progress-track { background-color: var(--progress-track); }

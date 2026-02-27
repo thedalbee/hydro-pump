@@ -39,11 +39,15 @@ const STATUS_ICON: Record<string, string> = {
 const ACTION_BUTTONS = [
   { status: 'done',      label: '완료', color: 'bg-green-500 hover:bg-green-400 text-black' },
   { status: 'paused',    label: '보류', color: 'bg-yellow-500 hover:bg-yellow-400 text-black' },
-  { status: 'archived',  label: '보관', color: 'bg-gray-600 hover:bg-gray-500 text-white' },
+  { status: 'archived',  label: '보관', color: 'bg-gray-500 hover:bg-gray-400 text-white' },
   { status: 'abandoned', label: '폐기', color: 'bg-red-600 hover:bg-red-500 text-white' },
 ]
-const LOG_COLOR = { system: 'text-gray-500', agent: 'text-cyan-400', user: 'text-white' }
-const LOG_PREFIX = { system: '·', agent: '▶', user: '›' }
+const LOG_TEXT: Record<string, string> = {
+  system: 'text-secondary',
+  agent: 'text-cyan-400',
+  user: 'text-primary',
+}
+const LOG_PREFIX: Record<string, string> = { system: '·', agent: '▶', user: '›' }
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
@@ -59,10 +63,8 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
   const bottomRef = useRef<HTMLDivElement>(null)
   const runningCount = project.tasks.filter(t => t.status === 'running').length
 
-  // 로그 로드 + 실시간 구독
   useEffect(() => {
     if (!expanded) return
-
     fetch(`/api/logs?project_id=${project.id}`)
       .then(r => r.json())
       .then(data => setLogs(Array.isArray(data) ? data : []))
@@ -72,15 +74,12 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'logs',
         filter: `project_id=eq.${project.id}`
-      }, payload => {
-        setLogs(prev => [...prev, payload.new as Log])
-      })
+      }, payload => setLogs(prev => [...prev, payload.new as Log]))
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [expanded, project.id])
 
-  // 새 로그 → 스크롤 하단
   useEffect(() => {
     if (expanded) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [logs, expanded])
@@ -113,13 +112,10 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
 
   return (
     <div
-      className="bg-gray-900 border rounded-xl transition-all duration-200 overflow-hidden"
-      style={{
-        borderColor: expanded ? '#06b6d4' : hovered ? '#4B5563' : '#1f2937',
-        transform: hovered && !expanded ? 'scale(1.01)' : 'scale(1)',
-      }}
+      className={`card ${expanded ? 'expanded' : ''}`}
+      style={{ transform: hovered && !expanded ? 'scale(1.01)' : 'scale(1)' }}
     >
-      {/* 카드 헤더 — 항상 보임 */}
+      {/* 카드 헤더 */}
       <div
         className="p-3 flex gap-3 cursor-pointer select-none"
         onMouseEnter={() => setHovered(true)}
@@ -136,26 +132,25 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center gap-2">
-            <h3 className="text-white font-bold text-sm truncate">{project.name}</h3>
+            <h3 className="text-primary font-bold text-sm truncate">{project.name}</h3>
             <div className="flex items-center gap-2 flex-shrink-0 ui-sans">
               {runningCount > 0 && <span className="text-xs text-cyan-400 animate-pulse">{runningCount} running</span>}
-              <span className="text-xs text-gray-500">{project.progress}%</span>
-              <span className="text-gray-600 text-xs">{expanded ? '▲' : '▼'}</span>
+              <span className="text-xs text-muted">{project.progress}%</span>
+              <span className="text-muted text-xs">{expanded ? '▲' : '▼'}</span>
             </div>
           </div>
-          <div className="mt-1.5 h-1 bg-gray-800 rounded-full overflow-hidden">
+          <div className="mt-1.5 h-1 progress-track rounded-full overflow-hidden">
             <div className="h-full bg-cyan-400 rounded-full transition-all duration-700" style={{ width: `${project.progress}%` }} />
           </div>
-          {/* 태스크 — 접힌 상태에서만 표시 */}
           {!expanded && project.tasks.length > 0 && (
             <ul className="mt-2 space-y-0.5">
               {project.tasks.slice(0, 2).map(task => (
                 <li key={task.id} className="flex items-center gap-1.5 text-xs ui-sans">
                   <span className={`flex-shrink-0 ${STATUS_COLOR[task.status]}`}>{STATUS_ICON[task.status]}</span>
-                  <span className="text-gray-400 truncate">{task.title}</span>
+                  <span className="text-secondary truncate">{task.title}</span>
                 </li>
               ))}
-              {project.tasks.length > 2 && <li className="text-xs text-gray-700 ui-sans">+{project.tasks.length - 2} more</li>}
+              {project.tasks.length > 2 && <li className="text-xs text-muted ui-sans">+{project.tasks.length - 2} more</li>}
             </ul>
           )}
         </div>
@@ -163,18 +158,16 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
 
       {/* 펼쳐진 영역 */}
       {expanded && (
-        <div className="border-t border-gray-800">
-          {/* 로그 타임라인 */}
-          <div className="px-4 py-3 space-y-1.5 max-h-56 overflow-y-auto">
+        <div style={{ borderTop: '1px solid var(--border)' }}>
+          {/* 로그 */}
+          <div className="px-4 py-3 space-y-1.5 max-h-52 overflow-y-auto">
             {logs.length === 0
-              ? <p className="ui-sans text-xs text-gray-700 italic">아직 기록이 없어요.</p>
+              ? <p className="ui-sans text-xs text-muted italic">아직 기록이 없어요.</p>
               : logs.map(log => (
                 <div key={log.id} className="flex items-start gap-2">
-                  <span className={`ui-sans text-xs flex-shrink-0 mt-0.5 ${LOG_COLOR[log.type]}`}>{LOG_PREFIX[log.type]}</span>
-                  <span className="ui-sans text-xs text-gray-600 flex-shrink-0 w-10">{formatTime(log.created_at)}</span>
-                  <span className={`text-sm leading-snug ${log.type === 'user' ? 'text-white' : log.type === 'agent' ? 'text-cyan-300' : 'text-gray-400'}`}>
-                    {log.message}
-                  </span>
+                  <span className={`ui-sans text-xs flex-shrink-0 mt-0.5 ${LOG_TEXT[log.type]}`}>{LOG_PREFIX[log.type]}</span>
+                  <span className="ui-sans text-xs text-muted flex-shrink-0 w-10">{formatTime(log.created_at)}</span>
+                  <span className={`text-sm leading-snug ui-sans ${LOG_TEXT[log.type]}`}>{log.message}</span>
                 </div>
               ))
             }
@@ -184,7 +177,7 @@ export function ProjectCard({ project, onUpdate }: { project: Project; onUpdate:
           {/* 입력창 */}
           <form onSubmit={sendLog} className="flex gap-2 px-4 pb-3">
             <input
-              className="ui-sans flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-600"
+              className="input flex-1"
               placeholder="메모 또는 명령..."
               value={input}
               onChange={e => setInput(e.target.value)}

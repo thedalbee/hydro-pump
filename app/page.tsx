@@ -57,7 +57,7 @@ export default function Dashboard() {
         </div>
 
         {active.length === 0 ? (
-          <div className="text-center py-16 text-gray-600 text-sm italic">
+          <div className="text-center py-16 text-sm italic text-muted ui-sans">
             No active projects.<br />Create one to get started.
           </div>
         ) : (
