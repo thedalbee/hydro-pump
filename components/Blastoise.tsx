@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useTheme } from '@/lib/theme'
 
-export function DarkraiHeader() {
+export function BlastoiseHeader() {
   const { theme, toggle } = useTheme()
 
   return (
@@ -11,7 +11,7 @@ export function DarkraiHeader() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iv/platinum/491.png"
-          alt="darkrai"
+          alt="blastoise"
           width={52}
           height={52}
           style={{ imageRendering: 'pixelated' }}

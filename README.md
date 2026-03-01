@@ -24,7 +24,7 @@ Built on top of OpenClaw's subagent system. One HTTP POST from your agent = dash
 - Task list with `waiting / active / issue / done` status
 - Done tasks sink to the bottom automatically (iOS Notes style)
 - D-day countdown on due dates
-- Darkrai as the mascot (naturally)
+- Blastoise as the mascot (naturally)
 - No polling — agents push updates via HTTP
 
 ---

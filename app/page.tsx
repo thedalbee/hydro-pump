@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ProjectCard } from '@/components/ProjectCard'
-import { DarkraiHeader } from '@/components/Darkrai'
+import { BlastoiseHeader } from '@/components/Blastoise'
 
 interface Project {
   id: string
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen">
-      <DarkraiHeader />
+      <BlastoiseHeader />
       <div className="max-w-2xl mx-auto px-4 py-6">
 
         {/* 탭 */}

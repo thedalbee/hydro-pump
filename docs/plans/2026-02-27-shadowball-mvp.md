@@ -388,16 +388,16 @@ git add components && git commit -m "feat: add PokemonSprite and ProjectCard com
 **Files:**
 - Modify: `app/page.tsx`
 - Create: `app/new-project/page.tsx`
-- Create: `components/Darkrai.tsx`
+- Create: `components/Blastoise.tsx`
 
-**Step 1: components/Darkrai.tsx (마스코트 헤더)**
+**Step 1: components/Blastoise.tsx (마스코트 헤더)**
 ```typescript
-export function DarkraiHeader() {
+export function BlastoiseHeader() {
   return (
     <header className="flex items-center gap-4 py-6 px-4 border-b border-gray-800">
       <img
         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iv/platinum/491.png"
-        alt="darkrai"
+        alt="blastoise"
         width={64}
         height={64}
         style={{ imageRendering: 'pixelated' }}
@@ -417,7 +417,7 @@ export function DarkraiHeader() {
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ProjectCard } from '@/components/ProjectCard'
-import { DarkraiHeader } from '@/components/Darkrai'
+import { BlastoiseHeader } from '@/components/Blastoise'
 import Link from 'next/link'
 
 export default function Dashboard() {
@@ -452,7 +452,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
-      <DarkraiHeader />
+      <BlastoiseHeader />
       <div className="max-w-3xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-sm font-mono text-gray-400">ACTIVE ({active.length})</h2>

@@ -102,7 +102,7 @@ aqua-jet/
 │   ├── ProjectCard.tsx   # 포켓몬 카드
 │   ├── PokemonSprite.tsx # 스프라이트 + 진화 로직
 │   ├── TaskList.tsx      # 에이전트 작업 목록
-│   └── Darkrai.tsx       # 마스코트 헤더
+│   └── Blastoise.tsx       # 마스코트 헤더
 ├── lib/
 │   ├── supabase.ts
 │   └── pokemon.ts        # PokeAPI 유틸
