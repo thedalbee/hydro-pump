@@ -180,10 +180,22 @@ Sprites are fetched from PokeAPI's BW (Black/White) generation sprites. Only Gen
 
 ---
 
+## ⭐ One last thing
+
+If you made it this far, you probably like Pokémon and AI agents.
+
+We have that in common.
+
+[**Star this repo**](https://github.com/dalbee-ship-it/hydro-pump) so more people can find it. Takes 1 second, means a lot.
+
+[![GitHub stars](https://img.shields.io/github/stars/dalbee-ship-it/hydro-pump?style=social)](https://github.com/dalbee-ship-it/hydro-pump)
+
+---
+
 ## License
 
 MIT
 
 ---
 
-Made with OpenClaw + too much Pokémon nostalgia.
+Made with [OpenClaw](https://openclaw.ai) + too much Pokémon nostalgia.
