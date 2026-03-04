@@ -18,7 +18,11 @@ npm install
 
 ### 2. Supabase
 
-Create a free project at https://supabase.com, then run this in SQL Editor:
+Create a free project at https://supabase.com (Sign up → New Project).
+
+After creating, go to **Settings → API** to find your URL and keys.
+
+Then open **SQL Editor** (left sidebar) and run this:
 
 ```sql
 create table projects (
